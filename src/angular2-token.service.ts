@@ -62,10 +62,10 @@ export class Angular2TokenService implements CanActivate {
         return new Headers;
     }
 
-    private atOptions: Angular2TokenOptions;
-    private atCurrentUserType: UserType;
-    private atCurrentAuthData: AuthData;
-    private atCurrentUserData: UserData;
+    protected atOptions: Angular2TokenOptions;
+    protected atCurrentUserType: UserType;
+    protected atCurrentAuthData: AuthData;
+    protected atCurrentUserData: UserData;
 
     constructor(
         private http: Http,
@@ -370,7 +370,7 @@ export class Angular2TokenService implements CanActivate {
 
         // Get auth data from local storage
         this.getAuthDataFromStorage();
-        
+
         // Merge auth headers to request if set
         if (this.atCurrentAuthData != null) {
             (<any>Object).assign(baseHeaders, {
@@ -395,7 +395,7 @@ export class Angular2TokenService implements CanActivate {
         return response;
     }
 
-    private mergeRequestOptionsArgs(options: RequestOptionsArgs, addOptions?: RequestOptionsArgs): RequestOptionsArgs {
+    protected mergeRequestOptionsArgs(options: RequestOptionsArgs, addOptions?: RequestOptionsArgs): RequestOptionsArgs {
 
         let returnOptions: RequestOptionsArgs = options;
 
@@ -406,7 +406,7 @@ export class Angular2TokenService implements CanActivate {
     }
 
     // Check if response is complete and newer, then update storage
-    private handleResponse(response: Observable<Response>): void {
+    protected handleResponse(response: Observable<Response>): void {
         response.subscribe(res => {
             this.getAuthHeadersFromResponse(<any>res);
         }, error => {
@@ -421,7 +421,7 @@ export class Angular2TokenService implements CanActivate {
      */
 
     // Try to load auth data
-    private tryLoadAuthData(): void {
+    protected tryLoadAuthData(): void {
 
         let userType = this.getUserTypeByName(localStorage.getItem('userType'));
 
@@ -438,7 +438,7 @@ export class Angular2TokenService implements CanActivate {
     }
 
     // Parse Auth data from response
-    private getAuthHeadersFromResponse(data: any): void {
+    protected getAuthHeadersFromResponse(data: any): void {
         let headers = data.headers;
 
         let authData: AuthData = {
@@ -453,7 +453,7 @@ export class Angular2TokenService implements CanActivate {
     }
 
     // Parse Auth data from post message
-    private getAuthDataFromPostMessage(data: any): void {
+    protected getAuthDataFromPostMessage(data: any): void {
         let authData: AuthData = {
             accessToken:    data['auth_token'],
             client:         data['client_id'],
@@ -466,7 +466,7 @@ export class Angular2TokenService implements CanActivate {
     }
 
     // Try to get auth data from storage.
-    private getAuthDataFromStorage(): void {
+    protected getAuthDataFromStorage(): void {
 
         let authData: AuthData = {
             accessToken:    localStorage.getItem('accessToken'),
@@ -481,7 +481,7 @@ export class Angular2TokenService implements CanActivate {
     }
 
     // Try to get auth data from url parameters.
-    private getAuthDataFromParams(): void {
+    protected getAuthDataFromParams(): void {
         if(this.activatedRoute.queryParams) // Fix for Testing, needs to be removed later
             this.activatedRoute.queryParams.subscribe(queryParams => {
                 let authData: AuthData = {
@@ -504,7 +504,7 @@ export class Angular2TokenService implements CanActivate {
      */
 
     // Write auth data to storage
-    private setAuthData(authData: AuthData): void {
+    protected setAuthData(authData: AuthData): void {
 
         if (this.checkAuthData(authData)) {
 
@@ -529,7 +529,7 @@ export class Angular2TokenService implements CanActivate {
      */
 
     // Check if auth data complete and if response token is newer
-    private checkAuthData(authData: AuthData): boolean {
+    protected checkAuthData(authData: AuthData): boolean {
 
         if (
             authData.accessToken != null &&
@@ -553,14 +553,14 @@ export class Angular2TokenService implements CanActivate {
      *
      */
 
-    private getUserPath(): string {
+    protected getUserPath(): string {
         if (this.atCurrentUserType == null)
             return '';
         else
             return this.atCurrentUserType.path + '/';
     }
 
-    private getApiPath(): string {
+    protected getApiPath(): string {
         let constructedPath = '';
 
         if (this.atOptions.apiBase != null)
@@ -572,7 +572,7 @@ export class Angular2TokenService implements CanActivate {
         return constructedPath;
     }
 
-    private getOAuthPath(oAuthType: string): string {
+    protected getOAuthPath(oAuthType: string): string {
         let oAuthPath: string;
 
         oAuthPath = this.atOptions.oAuthPaths[oAuthType];
@@ -583,7 +583,7 @@ export class Angular2TokenService implements CanActivate {
         return oAuthPath;
     }
 
-    private getOAuthUrl(oAuthPath: string, callbackUrl: string, windowType: string): string {
+    protected getOAuthUrl(oAuthPath: string, callbackUrl: string, windowType: string): string {
         let url: string;
 
         url =   `${this.atOptions.oAuthBase}/${oAuthPath}`;
@@ -602,7 +602,7 @@ export class Angular2TokenService implements CanActivate {
      *
      */
 
-    private requestCredentialsViaPostMessage(authWindow: any): Observable<any> {
+    protected requestCredentialsViaPostMessage(authWindow: any): Observable<any> {
         let pollerObserv = Observable.interval(500);
 
         let responseObserv = Observable.fromEvent(window, 'message').pluck('data')
@@ -622,7 +622,7 @@ export class Angular2TokenService implements CanActivate {
         return responseObserv;
     }
 
-    private oAuthWindowResponseFilter(data: any): any {
+    protected oAuthWindowResponseFilter(data: any): any {
         if(data.message == 'deliverCredentials' || data.message == 'authFailure')
             return data;
     }
@@ -634,7 +634,7 @@ export class Angular2TokenService implements CanActivate {
      */
 
     // Match user config by user config name
-    private getUserTypeByName(name: string): UserType {
+    protected getUserTypeByName(name: string): UserType {
         if (name == null || this.atOptions.userTypes == null)
             return null;
 
